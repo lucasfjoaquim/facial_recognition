@@ -3,6 +3,7 @@ import os
 import face_recognition
 import numpy
 from dotenv import load_dotenv
+from verifica_clareza import detectar_rosto_na_imagem
 
 load_dotenv()
 
@@ -57,7 +58,9 @@ class BancoDeDados:
         imagem_a_comparar = face_recognition.load_image_file(image)
         imagem_a_comparar = face_recognition.face_encodings(imagem_a_comparar)
         for worker in workers:
+            print(worker)
             encoded_image = self.str_to_encoded(worker[3])
+            print(face_recognition.compare_faces(encoded_image,imagem_a_comparar)[0])
             if face_recognition.compare_faces(encoded_image,imagem_a_comparar)[0]:
                 return f"Funcionario {worker[1]} indentificado"
 
@@ -68,7 +71,7 @@ class BancoDeDados:
         imagem = face_recognition.load_image_file(image)
         codificacao = face_recognition.face_encodings(imagem)[0]
         codificacao = str(codificacao)
-        codificacao = codificacao.replace("[","").replace("]","")
+        codificacao = codificacao.replace("[","").replace("]","").replace("\n", "")
         return codificacao
 
     def str_to_encoded(self,array_in_str):
@@ -77,4 +80,9 @@ class BancoDeDados:
 
 
 DB = BancoDeDados()
-print(DB.check_if_worker("images/du.jpg"))
+path = "images/du_sem_oculos.PNG"
+DB.check_worker_encryption()
+if detectar_rosto_na_imagem(path):
+    print(DB.check_if_worker(path))
+else:
+    print("clareza insatisfatorio")
